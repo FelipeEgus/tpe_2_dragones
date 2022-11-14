@@ -1,14 +1,12 @@
 <?php
 
 require_once './app/model/dragonesModel.php';
-require_once './app/model/orderModel.php';
 require_once './app/view/apiView.php';
 require_once './app/helper/authApiHelper.php';
 
 
 class dragonesApiController {
     private $model;
-    private $orderModel;
     private $view;
     private $authHelper;
 
@@ -19,7 +17,6 @@ class dragonesApiController {
         $this->model = new dragonesModel();
         $this->view = new apiView();
         $this->authHelper = new authApiHelper();
-        $this->orderModel = new orderModel();
 
         $this->data = file_get_contents("php://input");
 
@@ -29,44 +26,19 @@ class dragonesApiController {
         return json_decode($this->data);
     }
 
-    public function showDragones($params = null) {
-
-        $dragones = $this->model->getDragones();
-        $this->view->response($dragones);
-
-    }
-
-    function showDragonMitologia($params = null){
-
-        if(!empty($params[':mitologia'])){
-
-            $mitologia = $params[':mitologia'];
- 
-            $dragones = $this->model->getDragonMitologia($mitologia);
- 
-           if(empty($dragones)){
-                return $this->view->response("La mitologia no tiene dragones registrados", 404);
-            }
-
-            return $this->view->response($dragones, 200);
-
-        }
-
-    }
-
-    public function showDragonId($params = null) {
+    public function showDragon($params = null) {
 
         if(!empty($params[':ID'])){
 
             $id = $params[':ID'];
  
-            $dragones = $this->model->getDragonId($id);
+            $dragon = $this->model->getDragonId($id);
  
-           if(empty($dragones)){
+           if(empty($dragon)){
                 return $this->view->response("El dragon con el id=$id no existe", 404);
             }
 
-            return $this->view->response($dragones, 200);
+            return $this->view->response($dragon, 200);
 
         }
 
@@ -106,73 +78,33 @@ class dragonesApiController {
 
     }
 
-    public function orderDragon($params = null){
-    
-        if(!empty($params[':order'])){
-            $order = $params[':order'];
-            $dragones = $this->orderModel->orderDragon($order);
+    public function getFields($params = null) {
+        $params = [
+            "sort" => "asc",
+            "field" => "id",
+            "where" => "dragones.id_mitologia_fk",
+            "limit" => "18446744073709551610",
+            "offset" => "0"
+        ];
+        if (isset($_GET['sort'])){ 
+            $params["sort"] = $_GET['sort'];
         }
-
-        return $this->view->response($dragones, 200);
-
-    }
-
-    public function orderNombre($params = null){
-
-        if(!empty($params[':order'])){
-            $order = $params[':order'];
-            $dragones = $this->orderModel->orderNombre($order);
+        if (isset($_GET['field'])){
+            $params["field"] = $_GET['field'];
         }
-
-        return $this->view->response($dragones, 200);
-
-    }
-
-    public function orderMitologia($params = null){
-    
-        if(!empty($params[':order'])){
-            $order = $params[':order'];
-            $dragones = $this->orderModel->orderMitologia($order);
+        if (isset($_GET['where'])){
+            $params["where"] = $_GET['where'];
         }
-
-        return $this->view->response($dragones, 200);
-
-    }
-
-    public function orderDescrip($params = null){
-
-        if(!empty($params[':order'])){
-            $order = $params[':order'];
-            $dragones = $this->orderModel->orderDescrip($order);
+        if (isset($_GET['limit'])){
+            $params["limit"] = $_GET['limit'];
+            if (isset($_GET['offset'])){
+                $pag = (($_GET['offset']-1)*$params["limit"]);
+                $params["offset"] = $pag;
+            }
         }
+        
 
-        return $this->view->response($dragones, 200);
-
+        $db = $this->model->getAllSortBy($params);
+        $this->view->response($db);
     }
-
-    public function orderRepre($params = null){
-
-        if(!empty($params[':order'])){
-            $order = $params[':order'];
-            $dragones = $this->orderModel->orderRepre($order);
-        }
-
-        return $this->view->response($dragones, 200);
-
-    }
-
-    public function showLimit($params = null){
-
-        if(!empty($params[':pag'])){
-
-            $pag = $params[':pag'];
-            $num = ($pag - 1)*5 ;
- 
-            $dragones = $this->orderModel->getDragonLimit($num);
-
-            return $this->view->response($dragones, 200);
-
-        }
-    }
-
 }

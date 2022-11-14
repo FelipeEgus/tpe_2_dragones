@@ -8,24 +8,6 @@ class dragonesModel {
         $this->db = new PDO('mysql:host=localhost;'.'dbname=db_dragones;charset=utf8', 'root', '');
     }
 
-    public function getDragones() {
-        
-        $query = $this->db->prepare('SELECT dragones.id as id,nombre_raza, mitologias.mitologia as origen_mitologico, descrip, representaciones, id_mitologia_fk FROM `dragones` inner join mitologias on dragones.id_mitologia_fk = mitologias.id');
-        $query->execute();
-
-        return $query->fetchAll(PDO::FETCH_OBJ);
-
-    }
-
-    function getDragonMitologia($Mitologia){
-
-        $query = $this->db->prepare('SELECT dragones.id as id,nombre_raza, mitologias.mitologia as origen_mitologico, descrip, representaciones, id_mitologia_fk FROM `dragones` inner join mitologias on dragones.id_mitologia_fk = mitologias.id WHERE id_mitologia_fk = ?');
-        $query->execute([$Mitologia]);
-
-        return $query->fetchAll(PDO::FETCH_OBJ);
-
-    }
-
     public function getDragonId($id) {
 
         $query = $this->db->prepare('SELECT dragones.id as id,nombre_raza, mitologias.mitologia as origen_mitologico, descrip, representaciones, id_mitologia_fk FROM `dragones` inner join mitologias on dragones.id_mitologia_fk = mitologias.id WHERE dragones.id = ?');
@@ -49,6 +31,14 @@ class dragonesModel {
         $query = $this->db->prepare('DELETE FROM dragones WHERE id = ?');
         $query->execute([$id]);
 
+    }
+
+    function getAllSortBy($params) {
+        $query = $this->db->prepare("SELECT dragones.id as id,nombre_raza, mitologias.mitologia as origen_mitologico, descrip, representaciones, id_mitologia_fk FROM `dragones` inner join mitologias on dragones.id_mitologia_fk = mitologias.id 
+                                    WHERE dragones.id_mitologia_fk = $params[where] ORDER BY $params[field] $params[sort] LIMIT $params[limit] OFFSET $params[offset]");
+        $query->execute();
+        
+        return $query->fetchAll(PDO::FETCH_OBJ);
     }
 
 }
