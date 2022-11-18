@@ -89,17 +89,17 @@ class dragonesApiController {
         if (isset($_GET['sort'])){ 
             $params["sort"] = $_GET['sort'];
         }
-        if (isset($_GET['field'])){
+        if (isset($_GET['field'])&&!empty($_GET['field'])){
             $params["field"] = $_GET['field'];
         }
-        if (isset($_GET['where'])){
+        if (isset($_GET['where'])&&!empty($_GET['where'])){
             $params["where"] = $_GET['where'];
         }
-        if (isset($_GET['limit'])){
+        if (isset($_GET['limit'])&&$_GET['limit']!=null){
             $params["limit"] = $_GET['limit'];
-            if (isset($_GET['offset'])){
-                $pag = (($_GET['offset']-1)*$params["limit"]);
-                $params["offset"] = $pag;
+            if (isset($_GET['page'])&&$_GET['page']!=null){
+                $page = (($_GET['page']-1)*$params["limit"]);
+                $params["page"] = $page;
             }
         }
         
